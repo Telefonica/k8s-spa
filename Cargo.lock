@@ -563,6 +563,7 @@ dependencies = [
  "log",
  "pad",
  "rayon",
+ "regex",
  "reqwest",
  "rmp-serde",
  "serde",

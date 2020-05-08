@@ -10,9 +10,15 @@ mod analysis;
 mod import;
 
 #[derive(Clone, Debug, Ord, Eq, Hash, PartialOrd, PartialEq, Serialize, Deserialize)]
+pub enum ControllerType {
+  DAEMONSET, DEPLOYMENT, STATEFULSET, OTHER
+}
+
+#[derive(Clone, Debug, Ord, Eq, Hash, PartialOrd, PartialEq, Serialize, Deserialize)]
 pub struct ContainerId {
   namespace: String,
-  pod: String,
+  controller_type: ControllerType,
+  controller_id: String,
   container: String
 }
 
@@ -144,7 +150,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let (w, _) = term_size::dimensions().unwrap_or((80,0));
         let w = w.min(120);
         let memory_width = 6;
-        let id = format!("{}/{}/{}", id.namespace, id.pod, id.container).pad_to_width_with_char(w-memory_width, '.');
+        let id = format!("{}/{}/{}", id.namespace, id.controller_id, id.container).pad_to_width_with_char(w-memory_width, '.');
         println!("{} {:>memory_width$}Mi", id, r, memory_width=memory_width-2);
       }
     }

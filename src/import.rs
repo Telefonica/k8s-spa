@@ -1,5 +1,6 @@
 use hdrhistogram::Histogram;
 use log::info;
+use regex::Regex;
 use reqwest::blocking::Client;
 use rmp_serde::{from_slice, to_vec};
 use serde::Serialize;
@@ -9,7 +10,7 @@ use std::{
   io::prelude::*
 };
 use serde_json::Value;
-use crate::{ContainerId, MemoryInfo, MetricValue, SerializableHistogram};
+use crate::{ContainerId, MemoryInfo, MetricValue, SerializableHistogram, ControllerType};
 
 pub struct BasicAuthInfo<'a> {
   pub user: &'a str,
@@ -61,10 +62,25 @@ pub fn import_from_prometheus(url: &str,
     .into_iter()
     .filter(|v| v["metric"].get("pod").is_some());
   let mut container_presence = HashMap::new();
+  let is_deployment = Regex::new(r"^[\w-]+-[0-9a-f]+-[a-z0-9]{5}$").unwrap();
+  let is_daemonset = Regex::new(r"^[\w-]+-[a-z0-9]{5}$").unwrap();
+  let is_statefulset = Regex::new(r"^[\w-]+-[0-9]$").unwrap();
   for metric_info in resp {
+    let pod = metric_info["metric"]["pod"].as_str().unwrap();
+
+    let (controller_id, controller_type) = if is_deployment.is_match(pod) {
+      (&pod[..pod.len()-17], ControllerType::DEPLOYMENT)
+    } else if is_daemonset.is_match(pod) {
+      (&pod[..pod.len()-6], ControllerType::DAEMONSET)
+    } else if is_statefulset.is_match(pod) {
+      (&pod[..pod.len()-2], ControllerType::STATEFULSET)
+    } else {
+      (pod, ControllerType::OTHER)
+    };
     let id = ContainerId {
       namespace: metric_info["metric"]["namespace"].as_str().unwrap().to_string(),
-      pod: metric_info["metric"]["pod"].as_str().unwrap().to_string(),
+      controller_type,
+      controller_id: controller_id.to_string(),
       container: metric_info["metric"]["container"].as_str().unwrap().to_string(),
     };
     let mut container_histogram = Histogram::new(3)?;
@@ -84,7 +100,11 @@ pub fn import_from_prometheus(url: &str,
       let presence_set = container_presence.entry(v.timestamp).or_insert(Vec::new());
       presence_set.push(id.clone());
     }
-    containers.insert(id, SerializableHistogram(container_histogram));
+    if let Some(SerializableHistogram(h)) = containers.get_mut(&id) {
+      h.add(container_histogram).unwrap();
+    } else {
+      containers.insert(id, SerializableHistogram(container_histogram));
+    }
   }
   info!("Getting global metrics from Prometheus...");
   let query = PrometheusRangeQuery {
