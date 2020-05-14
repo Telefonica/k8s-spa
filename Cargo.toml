@@ -1,11 +1,14 @@
+# syntax = denzp/cargo-wharf-frontend:v0.1.0-alpha.2
 [package]
 name = "k8s-spa"
 readme = "README.md"
 description = "A Static Pod Autoscaler (SPA) for K8s, based on Prometheus metrics."
 version = "0.2.0"
+keywords = ["k8s", "kubernetes", "autoscaler", "pod"]
 authors = ["Ximo Guanter <joaquin.guantergonzalbez@telefonica.com>"]
 edition = "2018"
 license = "Apache-2.0"
+repository = "https://github.com/Telefonica/k8s-spa"
 
 [dependencies]
 chrono = "0.4"
@@ -22,3 +25,16 @@ rmp-serde = "0.14"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 term_size = "0.3"
+
+[package.metadata.wharf.builder]
+image = "clux/muslrust:stable"
+target = "x86_64-unknown-linux-musl"
+
+[package.metadata.wharf.output]
+image = "alpine:3.11.6"
+entrypoint = ["/k8s-spa"]
+args = ["-h"]
+
+[[package.metadata.wharf.binary]]
+name = "k8s-spa"
+destination = "/k8s-spa"
