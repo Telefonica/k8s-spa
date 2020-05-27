@@ -44,8 +44,11 @@ fn query_prometheus(client: &Client,
 pub fn import_from_prometheus(url: &str,
                               basic_auth: Option<BasicAuthInfo>,
                               start: i64,
-                              end: i64) -> Result<MemoryInfo, Box<dyn std::error::Error>> {
-  let client = Client::new();
+                              end: i64,
+                              no_verify_tls: bool) -> Result<MemoryInfo, Box<dyn std::error::Error>> {
+  let client = Client::builder()
+    .danger_accept_invalid_certs(no_verify_tls)
+    .build()?;
   let url = format!("{}/v1/query_range", url).replace("//", "/");
   info!("Getting container metrics from Prometheus...");
   let query = PrometheusRangeQuery {

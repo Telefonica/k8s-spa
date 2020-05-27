@@ -3,7 +3,7 @@
 name = "k8s-spa"
 readme = "README.md"
 description = "A Static Pod Autoscaler (SPA) for K8s, based on Prometheus metrics."
-version = "0.2.0"
+version = "0.3.0"
 keywords = ["k8s", "kubernetes", "autoscaler", "pod"]
 authors = ["Ximo Guanter <joaquin.guantergonzalbez@telefonica.com>"]
 edition = "2018"

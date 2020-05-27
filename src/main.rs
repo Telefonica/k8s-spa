@@ -109,6 +109,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
           .takes_value(true)
           .required(true)
           .help("Start date for analysis, in ISO8601 format (e.g. 2020-04-19T21:00:00Z)"))
+        .arg(Arg::with_name("no-verify-tls")
+          .required(false)
+          .long("no-verify-tls")
+          .takes_value(false)
+          .help("Do not verify TLS certificates"))
         .arg(Arg::with_name("output")
           .long("output")
           .short("o")
@@ -168,7 +173,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             args.value_of("url").unwrap(),
             auth_info,
             DateTime::parse_from_rfc3339(args.value_of("start_date").unwrap())?.timestamp(),
-            DateTime::parse_from_rfc3339(args.value_of("end_date").unwrap())?.timestamp()
+            DateTime::parse_from_rfc3339(args.value_of("end_date").unwrap())?.timestamp(),
+            args.is_present("no-verify-tls")
           )?;
           save_data(args.value_of("output").unwrap(), result)?;
         },
