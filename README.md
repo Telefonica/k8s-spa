@@ -4,7 +4,6 @@
 - [Installation](#installation)
 - [Usage](#usage)
 
-
 k8s-spa is a command line utility that will automatically calculate memory requests for your pods based on:
 
 1. real memory usage of your pods, based on Prometheus metrics
@@ -34,10 +33,16 @@ cargo install k8s-spa
 
 ### Binary
 
-Currently, the only binary distribution is through a docker container:
+Currently, the only binary distribution is through a docker container image:
 
 ```bash
-docker run telefonica/k8s-spa:0.2.0
+docker run telefonica/k8s-spa:0.3.1
+```
+
+You can build the docker image with:
+
+```bash
+docker build -f Cargo.toml .
 ```
 
 ## Usage

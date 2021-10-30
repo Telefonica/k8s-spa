@@ -3,7 +3,7 @@
 name = "k8s-spa"
 readme = "README.md"
 description = "A Static Pod Autoscaler (SPA) for K8s, based on Prometheus metrics."
-version = "0.3.0"
+version = "0.3.1"
 keywords = ["k8s", "kubernetes", "autoscaler", "pod"]
 authors = ["Ximo Guanter <joaquin.guantergonzalbez@telefonica.com>"]
 edition = "2018"
@@ -30,8 +30,11 @@ term_size = "0.3"
 image = "clux/muslrust:stable"
 target = "x86_64-unknown-linux-musl"
 
+[package.metadata.wharf.builder.env]
+CARGO_HOME = "/tmp"
+
 [package.metadata.wharf.output]
-image = "alpine:3.11.6"
+image = "alpine:3.12.8"
 entrypoint = ["/k8s-spa"]
 args = ["-h"]
 
